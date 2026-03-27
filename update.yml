@@ -1,0 +1,35 @@
+name: Update Proxy List
+
+on:
+  schedule:
+    - cron: '0 */4 * * *' # Запуск каждые 4 часа
+  workflow_dispatch:      # Кнопка для ручного запуска
+
+permissions:
+  contents: write         # Разрешение боту записывать файл в ваш репозиторий
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Execute collector
+        run: python collect.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "ConfigBot"
+          git config --global user.email "bot@github.com"
+          git add all_configs.txt
+          git commit -m "Updated configs: $(date)" || exit 0
+          git push
